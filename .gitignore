@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Modelos
+models/
+
+# Resultados
+results/
+
+# Figuras
+figures/
+
+# Datos
+data/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Entornos virtuales
+venv/
+.env
