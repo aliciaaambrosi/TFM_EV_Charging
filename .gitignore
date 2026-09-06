@@ -26,3 +26,12 @@ Thumbs.db
 # Entornos virtuales
 venv/
 .env
+
+# Datos mínimos necesarios para la app
+!data/
+data/*
+!data/app_municipal_deficit.parquet
+!data/app_ml_predictions.parquet
+!data/app_municipal_clusters.parquet
+!data/ev_charging_station_features.parquet
+!data/ev_charging_location_proposals.parquet
