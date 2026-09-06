@@ -90,11 +90,11 @@ def load_data():
         DATA_DIR / "ev_charging_location_proposals.parquet"
     )
 
-    ml = gpd.read_parquet(
+    ml = pd.read_parquet(
         DATA_DIR / "app_ml_predictions.parquet"
     )
 
-    clusters = gpd.read_parquet(
+    clusters = pd.read_parquet(
         DATA_DIR / "app_municipal_clusters.parquet"
     )
 
