@@ -14,7 +14,183 @@ st.set_page_config(
     layout="wide"
 )
 
+
 DATA_DIR = Path("data")
+
+# ============================================================
+# ESTILO CORPORATIVO
+# ============================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* ESTILO CORPORATIVO TFM */
+
+    /* Fondo general */
+    .stApp {
+        background-color: #F5F7FA;
+    }
+
+    /* Ancho y márgenes */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1450px;
+    }
+
+    /* SIDEBAR */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(
+            180deg,
+            #102A43 0%,
+            #163F63 100%
+        );
+        border-right: none;
+    }
+
+    section[data-testid="stSidebar"] * {
+        color: #FFFFFF;
+    }
+
+    section[data-testid="stSidebar"] hr {
+        border-color: rgba(255,255,255,0.18);
+    }
+
+    section[data-testid="stSidebar"] label {
+        color: #FFFFFF !important;
+    }
+
+    /* Títulos */
+    h1 {
+        color: #102A43;
+        font-weight: 750;
+        letter-spacing: -0.5px;
+    }
+
+    h2, h3 {
+        color: #243B53;
+        font-weight: 650;
+    }
+
+    /* Texto general */
+    p {
+        color: #486581;
+    }
+
+    /* Tarjetas KPI */
+    div[data-testid="stMetric"] {
+        background-color: #FFFFFF;
+        border: 1px solid #D9E2EC;
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 3px 10px rgba(16, 42, 67, 0.07);
+    }
+
+    div[data-testid="stMetricLabel"] {
+        color: #627D98;
+        font-weight: 600;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #102A43;
+        font-weight: 750;
+    }
+
+    /* Selectores */
+    div[data-baseweb="select"] > div {
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        border-color: #BCCCDC;
+    }
+
+    /* Tablas */
+    div[data-testid="stDataFrame"] {
+        background-color: #FFFFFF;
+        border: 1px solid #D9E2EC;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(16, 42, 67, 0.04);
+    }
+
+    /* Alertas */
+    div[data-testid="stAlert"] {
+        border-radius: 10px;
+    }
+
+    /* Separadores */
+    hr {
+        border-color: #D9E2EC;
+        margin-top: 1.8rem;
+        margin-bottom: 1.8rem;
+    }
+
+    /* Mapas */
+    iframe {
+        border-radius: 12px;
+    }
+
+    /* Botones */
+    .stButton > button {
+        background-color: #1F5A94;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .stButton > button:hover {
+        background-color: #174A7E;
+        color: #FFFFFF;
+        border: none;
+    }
+
+    /* Captions */
+    div[data-testid="stCaptionContainer"] {
+        color: #829AB1;
+    }
+
+    
+    /* FIX TITULOS VISIBLES */
+
+    /* Todos los títulos del contenido principal */
+    .main h1,
+    .main h2,
+    .main h3,
+    .main h4,
+    .main h5,
+    .main h6,
+    .main [data-testid="stHeadingWithActionElements"] h1,
+    .main [data-testid="stHeadingWithActionElements"] h2,
+    .main [data-testid="stHeadingWithActionElements"] h3 {
+        color: #102A43 !important;
+        -webkit-text-fill-color: #102A43 !important;
+        opacity: 1 !important;
+    }
+
+    /* Texto de los encabezados generado por Streamlit */
+    .main [data-testid="stMarkdownContainer"] h1,
+    .main [data-testid="stMarkdownContainer"] h2,
+    .main [data-testid="stMarkdownContainer"] h3,
+    .main [data-testid="stMarkdownContainer"] h4 {
+        color: #102A43 !important;
+        -webkit-text-fill-color: #102A43 !important;
+    }
+
+    /* Sidebar se mantiene blanco */
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] h4 {
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 
 # ============================================================
@@ -114,8 +290,8 @@ if page == "🏠 Inicio":
 
     st.markdown(
         """
-        ### Plataforma Inteligente para la Optimización de
-        Infraestructuras de Recarga de Vehículos Eléctricos en España
+        ### Plataforma inteligente de recarga de vehículos eléctricos
+        Optimización de infraestructuras de recarga en España
 
         Análisis geoespacial, Machine Learning y sistemas de recomendación
         para analizar la infraestructura pública de recarga en España.
