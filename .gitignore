@@ -35,3 +35,4 @@ data/*
 !data/app_municipal_clusters.parquet
 !data/ev_charging_station_features.parquet
 !data/ev_charging_location_proposals.parquet
+!data/ev_charging_recommender_connectors.parquet
