@@ -258,6 +258,10 @@ def load_data():
         DATA_DIR / "ev_charging_station_features.parquet"
     )
 
+    station_connectors = pd.read_parquet(
+        DATA_DIR / "ev_charging_recommender_connectors.parquet"
+    )
+
     deficit = gpd.read_parquet(
         DATA_DIR / "app_municipal_deficit.parquet"
     )
@@ -274,10 +278,17 @@ def load_data():
         DATA_DIR / "app_municipal_clusters.parquet"
     )
 
-    return stations, deficit, proposals, ml, clusters
+    return stations, station_connectors, deficit, proposals, ml, clusters
 
 
-stations, deficit, proposals, ml, clusters = load_data()
+(
+    stations,
+    station_connectors,
+    deficit,
+    proposals,
+    ml,
+    clusters
+) = load_data()
 
 
 # ============================================================
@@ -369,14 +380,14 @@ elif page == "🔌 Buscar estación":
     st.write(
         """
         Selecciona un municipio y los criterios de búsqueda.
-        El sistema prioriza estaciones cercanas y con mayor
-        potencia disponible.
+        El sistema recomienda estaciones compatibles priorizando
+        proximidad, potencia disponible y verificación reciente.
         """
     )
 
     st.caption(
-        "El filtro por tipo de conector se incorporará cuando esté "
-        "disponible el detalle estación-conector."
+        "El ranking utiliza un 60 % de proximidad, un 30 % de potencia "
+        "disponible y un 10 % de verificación reciente."
     )
 
     st.divider()
@@ -420,6 +431,20 @@ elif page == "🔌 Buscar estación":
 
     origin_lat = origin_point.y
     origin_lon = origin_point.x
+
+    connector_options = (
+        station_connectors["connector_name"]
+        .dropna()
+        .astype(str)
+        .sort_values()
+        .unique()
+        .tolist()
+    )
+
+    selected_connector = st.selectbox(
+        "Tipo de conector",
+        ["Todos"] + connector_options
+    )
 
     col1, col2 = st.columns(2)
 
@@ -467,12 +492,40 @@ elif page == "🔌 Buscar estación":
         candidates["distance_km"] <= max_distance
     ].copy()
 
-    if "max_power_kw" in candidates.columns:
+    if selected_connector != "Todos":
 
-        candidates = candidates[
-            candidates["max_power_kw"].fillna(0)
-            >= min_power
+        connector_filter = station_connectors[
+            station_connectors["connector_name"]
+            == selected_connector
+        ][
+            [
+                "station_id",
+                "connector_name",
+                "compatible_max_power_kw",
+                "compatible_quantity"
+            ]
         ].copy()
+
+        candidates = candidates.merge(
+            connector_filter,
+            on="station_id",
+            how="inner"
+        )
+
+        candidates["recommended_power_kw"] = (
+            candidates["compatible_max_power_kw"]
+        )
+
+    else:
+
+        candidates["recommended_power_kw"] = (
+            candidates["max_power_kw"]
+        )
+
+    candidates = candidates[
+        candidates["recommended_power_kw"].fillna(0)
+        >= min_power
+    ].copy()
 
     if len(candidates) > 0:
 
@@ -485,13 +538,20 @@ elif page == "🔌 Buscar estación":
         )
 
         power_score = np.minimum(
-            candidates["max_power_kw"].fillna(0) / 350,
+            candidates["recommended_power_kw"].fillna(0) / 350,
             1
         )
 
+        verification_score = (
+            candidates["is_recently_verified"]
+            .fillna(False)
+            .astype(int)
+        )
+
         candidates["recommendation_score"] = (
-            0.70 * distance_score
+            0.60 * distance_score
             + 0.30 * power_score
+            + 0.10 * verification_score
         )
 
         recommendations = (
@@ -517,7 +577,10 @@ elif page == "🔌 Buscar estación":
             "station_name",
             "town_ocm",
             "distance_km",
-            "max_power_kw",
+            "connector_name",
+            "recommended_power_kw",
+            "compatible_quantity",
+            "is_recently_verified",
             "price_min_eur_kwh",
             "usage_cost_clean"
         ]:
@@ -533,7 +596,10 @@ elif page == "🔌 Buscar estación":
                 "station_name": "Estación",
                 "town_ocm": "Municipio",
                 "distance_km": "Distancia (km)",
-                "max_power_kw": "Potencia máx. (kW)",
+                "connector_name": "Conector",
+                "recommended_power_kw": "Potencia disponible (kW)",
+                "compatible_quantity": "Cantidad compatible",
+                "is_recently_verified": "Verificada recientemente",
                 "price_min_eur_kwh": "Precio mín. €/kWh",
                 "usage_cost_clean": "Información de precio"
             }
@@ -544,14 +610,20 @@ elif page == "🔌 Buscar estación":
                 results_table["Distancia (km)"].round(2)
             )
 
-        if "Potencia máx. (kW)" in results_table.columns:
-            results_table["Potencia máx. (kW)"] = (
-                results_table["Potencia máx. (kW)"].round(1)
+        if "Potencia disponible (kW)" in results_table.columns:
+            results_table["Potencia disponible (kW)"] = (
+                results_table["Potencia disponible (kW)"].round(1)
             )
 
         if "Precio mín. €/kWh" in results_table.columns:
             results_table["Precio mín. €/kWh"] = (
                 results_table["Precio mín. €/kWh"].round(3)
+            )
+
+        if "Verificada recientemente" in results_table.columns:
+            results_table["Verificada recientemente"] = (
+                results_table["Verificada recientemente"]
+                .map({True: "Sí", False: "No"})
             )
 
         st.dataframe(
@@ -573,9 +645,17 @@ elif page == "🔌 Buscar estación":
             size=25
         )
 
-        st.caption(
-            "El ranking combina proximidad y potencia máxima disponible."
-        )
+        if selected_connector == "Todos":
+            st.caption(
+                "Sin filtro de conector, la potencia utilizada en el ranking "
+                "es la potencia máxima registrada para la estación."
+            )
+        else:
+            st.caption(
+                f"Resultados compatibles con {selected_connector}. "
+                "La potencia utilizada en el ranking corresponde "
+                "específicamente a ese tipo de conector."
+            )
 
     else:
 
